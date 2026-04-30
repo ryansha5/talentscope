@@ -921,23 +921,19 @@ const canadaProj=()=>d3.geoMercator().center([-96,62]).scale(580).translate([430
 
 async function initMap(){
   try{
-    const [world,usa]=await Promise.all([
-      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json()),
-      fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(r=>r.json())
-    ]);
+    const usa=await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(r=>r.json());
     mapProjection=d3.geoAlbersUsa().scale(1050).translate([430,270]);
     const path=d3.geoPath().projection(mapProjection);
-    const cProj=canadaProj();const pathCA=d3.geoPath().projection(cProj);
     const svg=d3.select('#map-svg').attr('viewBox','0 0 900 520');
-    // Ocean background — fills SVG with theme-aware ocean color
+    // Ocean background
     svg.append('rect').attr('x',0).attr('y',0).attr('width',900).attr('height',520).attr('class','map-ocean-bg');
-    // Canada via its own Mercator projection (avoids AlbersUSA mismatch)
-    const countries=topojson.feature(world,world.objects.countries);
-    svg.append('g').selectAll('path').data(countries.features.filter(d=>+d.id===124)).enter().append('path').attr('d',pathCA).attr('class','map-land').attr('stroke','var(--map-border)').attr('stroke-width',0.6);
-    // US states via AlbersUSA projection
+    // US states only — single AlbersUSA projection, no world atlas
     const states=topojson.feature(usa,usa.objects.states);
     svg.append('g').selectAll('path').data(states.features).enter().append('path').attr('d',path).attr('class','map-land').attr('stroke','var(--map-border)').attr('stroke-width',0.5);
+    // State interior borders
     svg.append('path').datum(topojson.mesh(usa,usa.objects.states,(a,b)=>a===b)).attr('d',path).attr('fill','none').attr('stroke','#6B4FA0').attr('stroke-width',1);
+    // Outer US border for clean edge
+    svg.append('path').datum(topojson.merge(usa,usa.objects.states.geometries)).attr('d',path).attr('fill','none').attr('stroke','var(--map-border)').attr('stroke-width',1.2);
     gBubbles=svg.append('g');
     mapReady=true;updateMapBubbles();
   }catch(e){console.warn('Map error:',e);document.getElementById('map-container').innerHTML='<div style="padding:60px;text-align:center;color:#7E5BA5">Map unavailable — requires network access</div>'}
