@@ -481,7 +481,8 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
   <!-- TAB: INTERNAL -->
   <div class="tab-panel" id="tab-internal">
     <div class="two-col">
-      <div class="card">
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="card">
         <div class="card-title"><span class="dot" style="background:var(--vp1)"></span>Time to Fill — Stage Breakdown</div>
         <div class="funnel">
           <div class="f-stage"><div class="f-days" id="f1">—</div><div class="f-unit">days</div><div class="f-label">Req Open → Req Release</div><div class="f-pct" id="f1p"></div></div>
@@ -493,20 +494,8 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
           <div class="ttf-num" id="ttf-num">—</div>
           <div class="ttf-lbl">Total days to fill<br><span style="color:var(--vp2)">req open → accepted offer</span></div>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="dot" style="background:var(--vgreen)"></span>Applicant Volume &amp; Retention</div>
-        <div class="stat-pair">
-          <div class="stat-block"><div class="stat-num b" id="s-app">—</div><div class="stat-label">Expected Applicants</div><div class="stat-sub">Est. per opening</div></div>
-          <div class="stat-block"><div class="stat-num g" id="s-ret">—</div><div class="stat-label">1-Year Retention</div><div class="stat-sub">Hires at 12 months</div></div>
         </div>
-        <div class="card-title" style="margin-top:4px"><span class="dot" style="background:var(--vp5)"></span>TTF Stage Proportions</div>
-        <canvas id="chart-donut" height="170"></canvas>
-      </div>
-    </div>
-
-    <!-- INTERNAL MOBILITY -->
-    <div class="card" style="margin-top:0" id="mobility-section">
+        <div class="card" id="mobility-section">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
         <div class="card-title" style="margin-bottom:0"><span class="dot" style="background:var(--vblue)"></span>Internal Mobility Pipeline</div>
         <span style="font-size:11px;color:var(--text-muted);font-style:italic">Top internal pathways into <b id="mob-target-label" style="color:var(--vp6)">—</b></span>
@@ -555,6 +544,17 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
             </button>
           </div>
         </div>
+      </div>
+        </div>
+      </div>
+            <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--vgreen)"></span>Applicant Volume &amp; Retention</div>
+        <div class="stat-pair">
+          <div class="stat-block"><div class="stat-num b" id="s-app">—</div><div class="stat-label">Expected Applicants</div><div class="stat-sub">Est. per opening</div></div>
+          <div class="stat-block"><div class="stat-num g" id="s-ret">—</div><div class="stat-label">1-Year Retention</div><div class="stat-sub">Hires at 12 months</div></div>
+        </div>
+        <div class="card-title" style="margin-top:4px"><span class="dot" style="background:var(--vp5)"></span>TTF Stage Proportions</div>
+        <canvas id="chart-donut" height="170"></canvas>
       </div>
     </div>
 
