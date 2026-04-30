@@ -1391,7 +1391,16 @@ function showMobDetail(src,loc){
   panel.style.width='276px';
   if(_mobTargetG){
     _mobTargetG.style.transition='transform 0.3s ease';
-    _mobTargetG.style.transform='translateX(-168px)';
+    _mobTargetG.style.transform='translateX(-285px)';
+  }
+  // Match detail panel height to SVG height
+  const svgH=document.getElementById('mob-svg').getAttribute('height');
+  if(svgH){
+    const inner=document.getElementById('mob-detail-inner');
+    inner.style.height=svgH+'px';
+    inner.style.boxSizing='border-box';
+    inner.style.overflowY='auto';
+    inner.style.marginLeft='0';
   }
   document.getElementById('mob-d-dot').style.background=src.color;
   document.getElementById('mob-d-title').textContent=src.title;
