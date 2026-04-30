@@ -932,7 +932,7 @@ function renderCompare(){
       const active=ci===sortCol;
       const ic=col.internal?'#C09BCC':active?'var(--vblue)':'var(--text-muted)';
       const fs=col.internal?'italic':'normal';
-      return `<th data-ci="${ci}" style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;
+      return `<th data-ci="${ci}" style="padding:9px 12px;text-align:center;font-size:10px;font-weight:700;
         letter-spacing:.07em;text-transform:uppercase;color:${ic};font-style:${fs};
         cursor:pointer;white-space:nowrap;border-bottom:2px solid var(--border);
         user-select:none;transition:color .15s">${col.label}${active?(sortDir>0?' ↓':' ↑'):''}</th>`;
@@ -953,7 +953,7 @@ function renderCompare(){
           if(col.key==='Hiring Difficulty'){color=diffColor(val);fw='700';}
           const display=col.fmt(val);
           const fs=col.internal?'font-style:italic;':'';
-          return `<td style="padding:7px 12px;color:${color};font-weight:${fw};${fs}background:${bg}">${display}</td>`;
+          return `<td style="padding:7px 12px;text-align:center;color:${color};font-weight:${fw};${fs}background:${bg}">${display}</td>`;
         }).join('')+'</tr>';
     }).join('');
 
