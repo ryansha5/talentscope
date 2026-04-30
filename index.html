@@ -675,16 +675,18 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
     <div class="two-col">
       <div class="card">
         <div class="card-title"><span class="dot" style="background:var(--vp5)"></span>Workforce Demographics</div>
-        <div style="display:flex;gap:12px;align-items:center">
-          <div style="flex:0 0 auto">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-align:center">Gender</div>
-            <canvas id="bls-demo-gender" width="120" height="120"></canvas>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:24px;justify-content:center;align-items:flex-end">
+            <div style="text-align:center">
+              <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Gender</div>
+              <canvas id="bls-demo-gender" width="180" height="180"></canvas>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Race / Ethnicity</div>
+              <canvas id="bls-demo-race" width="180" height="180"></canvas>
+            </div>
           </div>
-          <div style="flex:0 0 auto">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-align:center">Race / Ethnicity</div>
-            <canvas id="bls-demo-race" width="120" height="120"></canvas>
-          </div>
-          <div id="bls-demo-legend" style="flex:1;font-size:11px;line-height:2"></div>
+          <div id="bls-demo-legend" style="font-size:11px;line-height:1.9;display:flex;flex-wrap:wrap;gap:0 24px"></div>
         </div>
       </div>
       <div class="card">
@@ -1172,7 +1174,7 @@ function renderBLS(){
     type:'doughnut',
     data:{labels:['Male','Female'],
           datasets:[{data:d.demo.gender,backgroundColor:['#52247F','#95CBCD'],borderWidth:0}]},
-    options:{cutout:'60%',plugins:{legend:{display:false},
+    options:{cutout:'62%',maintainAspectRatio:true,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}}}
   });
   const rCtx=document.getElementById('bls-demo-race').getContext('2d');
@@ -1181,16 +1183,19 @@ function renderBLS(){
     data:{labels:['White','Asian','Hispanic','Black','Other'],
           datasets:[{data:d.demo.race,
             backgroundColor:['#7E5BA5','#95CBCD','#C09BCC','#52247F','#4A9FAB'],borderWidth:0}]},
-    options:{cutout:'60%',plugins:{legend:{display:false},
+    options:{cutout:'62%',maintainAspectRatio:true,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}}}
   });
   // Legend
   const leg=document.getElementById('bls-demo-legend');
   const rLabels=['White','Asian','Hispanic','Black','Other'];
   const rColors=['#7E5BA5','#95CBCD','#C09BCC','#52247F','#4A9FAB'];
-  leg.innerHTML='<div style="margin-bottom:6px;font-weight:600;color:var(--text-muted)">Gender</div>'+
-    `<div>Male: <b>${d.demo.gender[0]}%</b></div><div>Female: <b>${d.demo.gender[1]}%</b></div>`+
-    '<div style="margin-top:10px;margin-bottom:6px;font-weight:600;color:var(--text-muted)">Race/Ethnicity</div>'+
+  const gColors=['#52247F','#95CBCD'];
+  leg.innerHTML=
+    '<div style="flex-basis:100%;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px">Gender</div>'+
+    [['Male',d.demo.gender[0],gColors[0]],['Female',d.demo.gender[1],gColors[1]]].map(([l,v,c])=>
+      `<div><span style="color:${c}">■</span> ${l}: <b>${v}%</b></div>`).join('')+
+    '<div style="flex-basis:100%;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-top:10px;margin-bottom:4px">Race / Ethnicity</div>'+
     rLabels.map((l,i)=>`<div><span style="color:${rColors[i]}">■</span> ${l}: <b>${d.demo.race[i]}%</b></div>`).join('');
 
   // Wages
