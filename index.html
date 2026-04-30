@@ -504,6 +504,60 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
         <canvas id="chart-donut" height="170"></canvas>
       </div>
     </div>
+
+    <!-- INTERNAL MOBILITY -->
+    <div class="card" style="margin-top:0" id="mobility-section">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><span class="dot" style="background:var(--vblue)"></span>Internal Mobility Pipeline</div>
+        <span style="font-size:11px;color:var(--text-muted);font-style:italic">Top internal pathways into <b id="mob-target-label" style="color:var(--vp6)">—</b></span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-muted)">Click a role to see headcount &amp; export</span>
+      </div>
+      <div id="mob-no-data" style="text-align:center;padding:40px;color:var(--text-muted);display:none">
+        No internal mobility mapping available for this role yet.
+      </div>
+      <div id="mob-content" style="display:flex;gap:0;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <svg id="mob-svg" style="width:100%;display:block"></svg>
+        </div>
+        <div id="mob-detail" style="width:0;overflow:hidden;transition:width .3s ease;flex-shrink:0">
+          <div id="mob-detail-inner" style="width:260px;padding:16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);margin-left:16px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <div id="mob-d-dot" style="width:12px;height:12px;border-radius:3px;background:#7E5BA5;flex-shrink:0"></div>
+              <div id="mob-d-title" style="font-weight:700;font-size:14px;color:var(--text)">—</div>
+              <button onclick="closeMobDetail()" style="margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1;padding:0">✕</button>
+            </div>
+            <div style="margin-bottom:12px">
+              <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Transition Fit Score</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="flex:1;background:#2D2060;border-radius:4px;height:10px">
+                  <div id="mob-d-fitbar" style="height:10px;border-radius:4px;background:#52247F;transition:width .4s"></div>
+                </div>
+                <span id="mob-d-fit" style="font-size:14px;font-weight:700;color:var(--vp6)">—</span>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div style="background:#1F0E30;border-radius:8px;padding:10px;text-align:center">
+                <div id="mob-d-total" style="font-size:1.6rem;font-weight:700;color:var(--vp6)">—</div>
+                <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Company-wide</div>
+              </div>
+              <div style="background:#1F0E30;border-radius:8px;padding:10px;text-align:center">
+                <div id="mob-d-loc" style="font-size:1.6rem;font-weight:700;color:var(--vblue)">—</div>
+                <div id="mob-d-loc-label" style="font-size:10px;color:var(--text-muted);margin-top:2px">In market</div>
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Skills Overlap</div>
+              <div id="mob-d-skills" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+            </div>
+            <button id="mob-export-btn" onclick="exportMobility()"
+              style="width:100%;background:var(--vp1);color:white;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+              📋 Export Names (CSV)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 
@@ -927,6 +981,7 @@ function renderAll(){
   renderKPIs();renderMH();renderPay();renderTalent();renderFunnel();renderMetricPanel();
   updateMapBubbles();
   renderCompare();
+  renderMobility();
 }
 
 // ── init ──────────────────────────────────────────────────────
@@ -1166,6 +1221,208 @@ function renderBLS(){
       }
     }
   });
+}
+
+
+
+// ── Internal Mobility ─────────────────────────────────────────────────────────
+const MOBILITY_DATA={"Software Engineering Manager":{"target_label":"Software Engineering Manager","sources":[{"title":"Tech Lead","fit":96,"company_total":43,"color":"#52247F","skills":["People Leadership","System Design","Architecture","Cross-team Coordination","Mentorship"],"names":["Marcus Webb","Sarah Kim","David Okafor","Emily Zhang","Ryan Torres","Jessica Patel","Michael Singh","Laura Mendez","Chris Anderson","Priya Nair"]},{"title":"Principal SDE","fit":92,"company_total":67,"color":"#7E5BA5","skills":["Technical Leadership","System Design","Code Review","Strategic Planning","Mentorship"],"names":["Rachel Green","Sam Nakamura","Andre Williams","Hannah Kowalski","Raj Gupta","Monica Davis","Ben Taylor","Yuki Tanaka","Carlos Martinez","Diana Petrov"]},{"title":"Staff Engineer","fit":89,"company_total":58,"color":"#95CBCD","skills":["Technical Vision","Cross-functional Leadership","Architecture","Stakeholder Mgmt"],"names":["Isabel Santos","Jake Morrison","Amara Diallo","Oliver Chen","Nadia Popov","Finn O'Sullivan","Jasmine Li","Marcus Reid","Elena Vasquez","Tom Nguyen"]},{"title":"Senior SDE","fit":84,"company_total":180,"color":"#C09BCC","skills":["Deep Technical Expertise","Project Ownership","Code Review","Mentorship"],"names":["James Liu","Aisha Johnson","Derek Park","Natalie Brown","Omar Hassan","Sofia Rodriguez","Tyler Chen","Maya Washington","Kevin O'Brien","Fatima Al-Rashid"]},{"title":"SDE III","fit":71,"company_total":224,"color":"#6B60A8","skills":["Technical Skills","Project Delivery","Team Collaboration"],"names":["Noah Jackson","Leila Ibrahim","Connor Murphy","Zoe Thompson","Arjun Sharma","Mia Robinson","Ethan Clark","Aiko Yamamoto","Luke Patterson","Camila Ortiz"]}]}};
+
+const MOB_LOC_SHARE={
+  'AHQ/Arlington VA':0.12,'Atlanta':0.05,'Austin':0.07,'Boston':0.08,
+  'Chicago':0.06,'Cincinnati':0.02,'Cleveland':0.02,'Dallas':0.05,
+  'Denver':0.05,'Detroit':0.02,'Houston':0.04,'Los Angeles':0.08,
+  'Minneapolis':0.04,'Nashville':0.03,'New York':0.16,'Orlando':0.02,
+  'Philadelphia':0.04,'Phoenix':0.04,'Pittsburgh':0.03,'Portland':0.04,
+  'SF/Bay Area':0.18,'Salt Lake City':0.03,'San Diego':0.04,'Seattle':0.15,
+  'St. Louis':0.02,'Tampa':0.02,'Toronto':0.06,'Vancouver':0.03
+};
+
+let _mobCurrentSrc=null;
+
+function locCount(total,loc){
+  return Math.max(1,Math.round(total*(MOB_LOC_SHARE[loc]||0.03)));
+}
+
+function renderMobility(){
+  const title=document.getElementById('sel-title').value;
+  const loc=document.getElementById('sel-location').value;
+  const d=MOBILITY_DATA[title];
+  const noData=document.getElementById('mob-no-data');
+  const content=document.getElementById('mob-content');
+  document.getElementById('mob-target-label').textContent=title||'—';
+
+  if(!d||!d.sources||!d.sources.length){
+    noData.style.display='block';
+    content.style.display='none';
+    return;
+  }
+  noData.style.display='none';
+  content.style.display='flex';
+  closeMobDetail();
+  _mobCurrentSrc=null;
+
+  const svg=document.getElementById('mob-svg');
+  const W=svg.parentElement.clientWidth||680;
+  const SRCS=d.sources;
+  const boxH=52, gap=14;
+  const totalH=SRCS.length*(boxH+gap)-gap;
+  const H=totalH+40;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('height',H);
+  svg.innerHTML='';
+
+  const SRC_W=170, SRC_X=4;
+  const TGT_W=140, TGT_X=W-TGT_W-4;
+  const startY=20;
+
+  // Draw flows first (behind boxes)
+  const ns='http://www.w3.org/2000/svg';
+  SRCS.forEach((src,i)=>{
+    const srcMidY=startY+i*(boxH+gap)+boxH/2;
+    const tgtPortH=totalH/SRCS.length;
+    const tgtMidY=startY+i*tgtPortH+tgtPortH/2;
+    const flowW=Math.max(5, Math.round(src.fit/100*24));
+    const cx1=SRC_X+SRC_W+(TGT_X-SRC_X-SRC_W)*0.42;
+    const cx2=SRC_X+SRC_W+(TGT_X-SRC_X-SRC_W)*0.58;
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('d',`M ${SRC_X+SRC_W} ${srcMidY} C ${cx1} ${srcMidY}, ${cx2} ${tgtMidY}, ${TGT_X} ${tgtMidY}`);
+    path.setAttribute('stroke',src.color);
+    path.setAttribute('stroke-width',flowW);
+    path.setAttribute('fill','none');
+    path.setAttribute('opacity','0.45');
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('class','mob-flow');
+    path.dataset.idx=i;
+    svg.appendChild(path);
+  });
+
+  // Target box
+  const tgtG=document.createElementNS(ns,'g');
+  const tgtRect=document.createElementNS(ns,'rect');
+  tgtRect.setAttribute('x',TGT_X);tgtRect.setAttribute('y',startY);
+  tgtRect.setAttribute('width',TGT_W);tgtRect.setAttribute('height',totalH);
+  tgtRect.setAttribute('rx','8');tgtRect.setAttribute('fill','#1F0E30');
+  tgtRect.setAttribute('stroke','#52247F');tgtRect.setAttribute('stroke-width','2');
+  tgtG.appendChild(tgtRect);
+
+  const lines=wrapText(d.target_label||title,16);
+  lines.forEach((ln,li)=>{
+    const t=document.createElementNS(ns,'text');
+    t.setAttribute('x',TGT_X+TGT_W/2);
+    t.setAttribute('y',startY+totalH/2+(li-(lines.length-1)/2)*17);
+    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+    t.setAttribute('fill','white');t.setAttribute('font-size','12');t.setAttribute('font-weight','700');
+    t.setAttribute('font-family','Cabin,sans-serif');
+    t.textContent=ln;
+    tgtG.appendChild(t);
+  });
+  svg.appendChild(tgtG);
+
+  // Source boxes
+  SRCS.forEach((src,i)=>{
+    const y=startY+i*(boxH+gap);
+    const g=document.createElementNS(ns,'g');
+    g.style.cursor='pointer';
+
+    const rect=document.createElementNS(ns,'rect');
+    rect.setAttribute('x',SRC_X);rect.setAttribute('y',y);
+    rect.setAttribute('width',SRC_W);rect.setAttribute('height',boxH);
+    rect.setAttribute('rx','7');rect.setAttribute('fill',src.color);
+    rect.setAttribute('opacity','0.88');
+    g.appendChild(rect);
+
+    // Title
+    const t1=document.createElementNS(ns,'text');
+    t1.setAttribute('x',SRC_X+10);t1.setAttribute('y',y+18);
+    t1.setAttribute('fill','white');t1.setAttribute('font-size','12');t1.setAttribute('font-weight','700');
+    t1.setAttribute('font-family','Cabin,sans-serif');
+    t1.textContent=src.title;
+    g.appendChild(t1);
+
+    // Fit score
+    const t2=document.createElementNS(ns,'text');
+    t2.setAttribute('x',SRC_X+10);t2.setAttribute('y',y+33);
+    t2.setAttribute('fill','rgba(255,255,255,0.75)');t2.setAttribute('font-size','10');
+    t2.setAttribute('font-family','Cabin,sans-serif');
+    t2.textContent=`${src.fit}% fit · ${src.company_total} total · ${locCount(src.company_total,loc)} in ${loc.split('/')[0]}`;
+    g.appendChild(t2);
+
+    // Click target
+    const clickRect=document.createElementNS(ns,'rect');
+    clickRect.setAttribute('x',SRC_X);clickRect.setAttribute('y',y);
+    clickRect.setAttribute('width',SRC_W);clickRect.setAttribute('height',boxH);
+    clickRect.setAttribute('fill','transparent');
+    clickRect.dataset.idx=i;
+    clickRect.addEventListener('click',()=>showMobDetail(src,loc));
+    clickRect.addEventListener('mouseenter',()=>{rect.setAttribute('opacity','1');highlightFlow(i,true);});
+    clickRect.addEventListener('mouseleave',()=>{rect.setAttribute('opacity','0.88');highlightFlow(i,false);});
+    g.appendChild(clickRect);
+
+    svg.appendChild(g);
+  });
+}
+
+function highlightFlow(idx,on){
+  document.querySelectorAll('.mob-flow').forEach(p=>{
+    if(parseInt(p.dataset.idx)===idx){
+      p.setAttribute('opacity',on?'0.75':'0.45');
+      p.setAttribute('stroke-width',on?Math.max(8,parseInt(p.getAttribute('stroke-width'))+4):p.getAttribute('stroke-width'));
+    }
+  });
+}
+
+function wrapText(text,maxChars){
+  const words=text.split(' ');const lines=[];let cur='';
+  words.forEach(w=>{
+    if((cur+' '+w).trim().length>maxChars&&cur){lines.push(cur.trim());cur=w;}
+    else cur=(cur+' '+w).trim();
+  });
+  if(cur)lines.push(cur.trim());
+  return lines;
+}
+
+function showMobDetail(src,loc){
+  _mobCurrentSrc=src;
+  const panel=document.getElementById('mob-detail');
+  panel.style.width='276px';
+  document.getElementById('mob-d-dot').style.background=src.color;
+  document.getElementById('mob-d-title').textContent=src.title;
+  document.getElementById('mob-d-fit').textContent=src.fit+'%';
+  document.getElementById('mob-d-fitbar').style.width=src.fit+'%';
+  document.getElementById('mob-d-fitbar').style.background=src.color;
+  document.getElementById('mob-d-total').textContent=src.company_total;
+  const lc=locCount(src.company_total,loc);
+  document.getElementById('mob-d-loc').textContent=lc;
+  document.getElementById('mob-d-loc-label').textContent='In '+loc.split('/')[0];
+  const skillsDiv=document.getElementById('mob-d-skills');
+  skillsDiv.innerHTML=src.skills.map(s=>
+    `<span style="background:#2D2060;color:var(--vp6);border-radius:4px;padding:3px 7px;font-size:10px;font-weight:600">${s}</span>`
+  ).join('');
+}
+
+function closeMobDetail(){
+  document.getElementById('mob-detail').style.width='0';
+  _mobCurrentSrc=null;
+}
+
+function exportMobility(){
+  if(!_mobCurrentSrc)return;
+  const title=document.getElementById('sel-title').value;
+  const loc=document.getElementById('sel-location').value;
+  const src=_mobCurrentSrc;
+  const lc=locCount(src.company_total,loc);
+  const header='Name,Current Title,Target Role,Location,Fit Score\n';
+  const rows=src.names.map((n,i)=>{
+    const inLoc=i<lc?loc:'Various';
+    return `"${n}","${src.title}","${title}","${inLoc}",${src.fit}%`;
+  }).join('\n');
+  const csv=header+rows;
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`mobility_${src.title.replace(/\s+/g,'_')}_into_${title.replace(/\s+/g,'_')}.csv`;
+  a.click();URL.revokeObjectURL(url);
 }
 
 
