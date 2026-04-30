@@ -577,14 +577,14 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
       <div class="card">
         <div class="card-title"><span class="dot" style="background:var(--vp5)"></span>Workforce Demographics</div>
         <div style="display:flex;flex-direction:column;gap:16px">
-          <div style="display:flex;gap:24px;justify-content:center;align-items:flex-end">
-            <div style="text-align:center">
+          <div style="display:flex;gap:16px;justify-content:center">
+            <div style="text-align:center;flex:1;min-width:0">
               <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Gender</div>
-              <canvas id="bls-demo-gender" width="180" height="180"></canvas>
+              <div style="position:relative;height:230px"><canvas id="bls-demo-gender"></canvas></div>
             </div>
-            <div style="text-align:center">
+            <div style="text-align:center;flex:1;min-width:0">
               <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Race / Ethnicity</div>
-              <canvas id="bls-demo-race" width="180" height="180"></canvas>
+              <div style="position:relative;height:230px"><canvas id="bls-demo-race"></canvas></div>
             </div>
           </div>
           <div id="bls-demo-legend" style="font-size:11px;line-height:1.9;display:flex;flex-wrap:wrap;gap:0 24px"></div>
@@ -1170,7 +1170,7 @@ function renderBLS(){
     type:'doughnut',
     data:{labels:['Male','Female'],
           datasets:[{data:d.demo.gender,backgroundColor:['#52247F','#95CBCD'],borderWidth:0}]},
-    options:{cutout:'62%',maintainAspectRatio:true,plugins:{legend:{display:false},
+    options:{cutout:'65%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}}}
   });
   const rCtx=document.getElementById('bls-demo-race').getContext('2d');
@@ -1179,7 +1179,7 @@ function renderBLS(){
     data:{labels:['White','Asian','Hispanic','Black','Other'],
           datasets:[{data:d.demo.race,
             backgroundColor:['#7E5BA5','#95CBCD','#C09BCC','#52247F','#4A9FAB'],borderWidth:0}]},
-    options:{cutout:'62%',maintainAspectRatio:true,plugins:{legend:{display:false},
+    options:{cutout:'65%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}}}
   });
   // Legend
