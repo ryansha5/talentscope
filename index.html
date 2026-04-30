@@ -982,7 +982,7 @@ function renderAll(){
   renderKPIs();renderMH();renderPay();renderTalent();renderFunnel();renderMetricPanel();
   updateMapBubbles();
   renderCompare();
-  renderMobility();
+  try{renderMobility();}catch(e){}
 }
 
 // ── init ──────────────────────────────────────────────────────
@@ -1427,9 +1427,10 @@ function exportMobility(){
 }
 
 
-// BLS init
+// Init after all data defined
 initBLSSelect();
 renderBLS();
+renderMobility();
 </script>
 </body>
 </html>
