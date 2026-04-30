@@ -372,10 +372,10 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
 
   <!-- TABS -->
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="showTab('overview',this)">🗺 Market Map</button>
-    <button class="tab-btn" onclick="showTab('market',this)">📊 Market Details</button>
-    <button class="tab-btn" onclick="showTab('internal',this)">📋 Internal Metrics</button>
-    <button class="tab-btn" onclick="showTab('economic',this)">🏙 Economic Data</button>
+    <button class="tab-btn active" onclick="showTab('overview',this)">Market Map</button>
+    <button class="tab-btn" onclick="showTab('market',this)">Market Details</button>
+    <button class="tab-btn" onclick="showTab('internal',this)">Internal Metrics</button>
+    <button class="tab-btn" onclick="showTab('economic',this)">Economic Data</button>
   </div>
 
   <!-- TAB: MAP -->
@@ -407,25 +407,25 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
       <div class="metric-panel">
         <div class="mp-head">Key Metrics — <span class="mp-loc" id="mp-loc">—</span></div>
         <div class="mp-card">
-          <div class="mp-title">⏱ Time to Fill</div>
+          <div class="mp-title">Time to Fill</div>
           <div class="mp-value" id="mp-ttf">—</div>
           <div class="mp-sub">Total days from req open to accept</div>
           <div class="mp-bar-wrap"><div class="mp-bar" id="mp-ttf-bar" style="width:0%"></div></div>
         </div>
         <div class="mp-card">
-          <div class="mp-title">💰 Market Compensation</div>
+          <div class="mp-title">Market Compensation</div>
           <div class="mp-value" id="mp-comp">—</div>
           <div class="mp-sub" id="mp-comp-sub">Median base · 95th pct</div>
           <div class="mp-bar-wrap"><div class="mp-bar" id="mp-comp-bar" style="width:0%"></div></div>
         </div>
         <div class="mp-card">
-          <div class="mp-title">👥 Total Talent Supply</div>
+          <div class="mp-title">Total Talent Supply</div>
           <div class="mp-value" id="mp-talent">—</div>
           <div class="mp-sub" id="mp-talent-sub">Professionals in market</div>
           <div class="mp-bar-wrap"><div class="mp-bar" id="mp-talent-bar" style="width:0%"></div></div>
         </div>
         <div class="mp-card">
-          <div class="mp-title">⚡ Competitive Intensity</div>
+          <div class="mp-title">Competitive Intensity</div>
           <div class="mp-value" id="mp-ci">—</div>
           <div class="mp-sub" id="mp-ci-sub">Open postings vs. supply ratio</div>
           <div class="mp-bar-wrap"><div class="mp-bar" id="mp-ci-bar" style="width:0%"></div></div>
@@ -540,7 +540,7 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
             </div>
             <button id="mob-export-btn" onclick="exportMobility()"
               style="width:100%;background:var(--vp1);color:white;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-              📋 Export Names (CSV)
+              Export Names (CSV)
             </button>
           </div>
         </div>
@@ -570,31 +570,27 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
         <span style="color:var(--text-muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Market</span>
         <select id="sel-bls-loc" onchange="renderBLS()" style="min-width:180px"></select>
       </div>
-      <span style="font-size:11px;color:var(--text-muted);margin-left:auto;font-style:italic">📡 Bureau of Labor Statistics — Synthetic Sample Data</span>
+      <span style="font-size:11px;color:var(--text-muted);margin-left:auto;font-style:italic">Bureau of Labor Statistics — Synthetic Sample Data</span>
     </div>
 
     <!-- KPI row -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px" id="bls-kpi-row">
       <div class="kpi-card">
-        <div class="kpi-icon">👷</div>
         <div class="kpi-val" id="bls-lf">—</div>
         <div class="kpi-label">Labor Force</div>
         <div class="kpi-sub" id="bls-lf-sub">Total civilian labor force</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">✅</div>
         <div class="kpi-val" id="bls-emp">—</div>
         <div class="kpi-label">Employed</div>
         <div class="kpi-sub" id="bls-emp-sub">Persons employed</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">📉</div>
         <div class="kpi-val" id="bls-ur">—</div>
         <div class="kpi-label">Unemployment Rate</div>
         <div class="kpi-sub" id="bls-ur-sub">LAUS — 2023 annual avg</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">🎯</div>
         <div class="kpi-val" id="bls-or">—</div>
         <div class="kpi-label">Job Openings Rate</div>
         <div class="kpi-sub" id="bls-or-sub">JOLTS — openings per 100 workers</div>
@@ -1022,11 +1018,11 @@ function fmtBig(n){
 function fmtPct(n){return n.toFixed(1)+'%'}
 function fmtDollar(n){return '$'+n.toLocaleString()}
 function tightnessLabel(s){
-  if(s>=85)return '🔴 Extremely Tight';
-  if(s>=75)return '🟠 Very Tight';
-  if(s>=65)return '🟡 Competitive';
-  if(s>=55)return '🟢 Moderate';
-  return '🔵 Favorable';
+  if(s>=85)return 'Extremely Tight';
+  if(s>=75)return 'Very Tight';
+  if(s>=65)return 'Competitive';
+  if(s>=55)return 'Moderate';
+  return 'Favorable';
 }
 function tightnessColor(s){
   if(s>=85)return '#E85D75';
@@ -1193,7 +1189,7 @@ function renderBLS(){
   const rLabels=['White','Asian','Hispanic','Black','Other'];
   const rColors=['#7E5BA5','#95CBCD','#C09BCC','#52247F','#4A9FAB'];
   leg.innerHTML='<div style="margin-bottom:6px;font-weight:600;color:var(--text-muted)">Gender</div>'+
-    `<div>🟣 Male: <b>${d.demo.gender[0]}%</b></div><div>🔵 Female: <b>${d.demo.gender[1]}%</b></div>`+
+    `<div>Male: <b>${d.demo.gender[0]}%</b></div><div>Female: <b>${d.demo.gender[1]}%</b></div>`+
     '<div style="margin-top:10px;margin-bottom:6px;font-weight:600;color:var(--text-muted)">Race/Ethnicity</div>'+
     rLabels.map((l,i)=>`<div><span style="color:${rColors[i]}">■</span> ${l}: <b>${d.demo.race[i]}%</b></div>`).join('');
 
