@@ -433,28 +433,24 @@ select:focus{border-color:var(--vp1);box-shadow:0 0 0 2px rgba(82,36,127,0.35)}
       </div>
     </div>
 
-    <!-- LOCATION COMPARISON (below map) -->
+    <!-- LOCATION COMPARISON TABLE -->
     <div class="card" style="margin-top:0">
-      <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
-        <div class="card-title" id="cmp-title" style="margin-bottom:0"><span class="dot" style="background:var(--vp1)"></span>Location Comparison</div>
-        <div class="filter-group" style="flex-direction:row;align-items:center;gap:8px;margin-left:auto">
-          <span class="map-metric-label">Compare</span>
-          <select id="sel-cmp" onchange="renderCompare()" style="min-width:180px">
-            <option value="Median Base pay">Median Base Pay</option>
-            <option value="95th Percentile Pay">95th Percentile Pay</option>
-            <option value="Total Talent Size">Total Talent Pool</option>
-            <option value="Open Job Postings">Open Job Postings</option>
-            <option value="Total_Days_to_Fill">Total Days to Fill</option>
-            <option value="Expected_Applicants">Expected Applicants</option>
-            <option value="Annual Demand">Annual Demand</option>
-            <option value="Attrition Rate">Attrition Rate (%)</option>
-            <option value="Annual Growth Rate">Annual Growth Rate (%)</option>
-            <option value="Women">Women in Role (%)</option>
-          </select>
-        </div>
-        <span style="font-size:11px;color:var(--text-muted);align-self:center">Selected location highlighted in Vertex Blue</span>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><span class="dot" style="background:var(--vp1)"></span>Market Comparison — All Locations</div>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:auto">Click any column header to sort · Selected location highlighted</span>
       </div>
-      <canvas id="chart-cmp" height="300"></canvas>
+      <div style="overflow-x:auto;max-height:420px;overflow-y:auto;border-radius:6px">
+        <table id="cmp-table" style="width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap">
+          <thead id="cmp-thead" style="position:sticky;top:0;z-index:2;background:#2D1F58"></thead>
+          <tbody id="cmp-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:18px;font-size:10px;color:var(--text-muted);flex-wrap:wrap">
+        <span><span style="display:inline-block;width:8px;height:8px;background:rgba(80,200,120,0.4);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Above market median</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:rgba(232,93,117,0.4);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Below market median</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:rgba(149,203,205,0.3);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Selected location</span>
+        <span style="margin-left:auto;font-style:italic;color:#C09BCC">Italicised columns = Vertex internal data</span>
+      </div>
     </div>
   </div>
 
@@ -854,28 +850,123 @@ function renderMetricPanel(){
 // ── Compare ───────────────────────────────────────────────────
 const CMP_LABELS={'Median Base pay':'Median Base Pay','95th Percentile Pay':'95th Percentile Pay','Total Talent Size':'Total Talent Pool','Open Job Postings':'Open Job Postings','Total_Days_to_Fill':'Total Days to Fill','Expected_Applicants':'Expected Applicants','Annual Demand':'Annual Demand','Attrition Rate':'Attrition Rate (%)','Annual Growth Rate':'Annual Growth Rate (%)','Women':'Women in Role (%)'};
 function renderCompare(){
-  const f=document.getElementById('sel-family').value,t=document.getElementById('sel-title').value;
-  const metric=document.getElementById('sel-cmp').value;
+  const f=document.getElementById('sel-family').value;
+  const t=document.getElementById('sel-title').value;
+  const sl=document.getElementById('sel-location').value;
   if(!DATA[f]||!DATA[f][t])return;
   cCmp=kill(cCmp);
-  const locs=Object.keys(DATA[f][t]).sort();
-  const vals=locs.map(l=>{const v=DATA[f][t][l][metric];if(v==null)return null;if(typeof v==='string'&&v.endsWith('%'))return parseFloat(v);return typeof v==='number'?v:null});
-  const pairs=locs.map((l,i)=>[l,vals[i]]).filter(p=>p[1]!=null).sort((a,b)=>b[1]-a[1]);
-  const sl=document.getElementById('sel-location').value;
-  const isMoney=['Median Base pay','95th Percentile Pay'].includes(metric);
-  const isPct=['Attrition Rate','Annual Growth Rate','Women'].includes(metric);
-  document.getElementById('cmp-title').innerHTML=`<span class="dot" style="background:var(--vp1)"></span>${CMP_LABELS[metric]||metric} — All Markets for <em>${t}</em>`;
-  try{
-    cCmp=new Chart(document.getElementById('chart-cmp').getContext('2d'),{type:'bar',data:{
-      labels:pairs.map(p=>p[0]),
-      datasets:[{label:CMP_LABELS[metric]||metric,data:pairs.map(p=>p[1]),
-        backgroundColor:pairs.map(p=>p[0]===sl?'rgba(149,203,205,0.85)':'rgba(82,36,127,0.5)'),
-        borderColor:pairs.map(p=>p[0]===sl?'#95CBCD':'#7E5BA5'),
-        borderWidth:1,borderRadius:3}]
-    },options:{responsive:true,indexAxis:'y',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw;return isMoney?' $'+Math.round(v).toLocaleString():isPct?' '+v.toFixed(1)+'%':' '+v.toLocaleString()}}}},
-      scales:{x:{ticks:{color:'#7E5BA5',callback:v=>isMoney?'$'+(v/1000).toFixed(0)+'k':isPct?v+'%':v}},y:{ticks:{color:'#E2DAF2',font:{size:11}}}}}});
-  }catch(e){console.warn('Compare chart error:',e)}
+
+  const COLS=[
+    {key:'_loc',                  label:'Location',         fmt:v=>v,                                   sort:'str', internal:false},
+    {key:'Hiring Difficulty',     label:'Hiring Difficulty',fmt:v=>v?v.charAt(0)+v.slice(1).toLowerCase():'—', sort:'diff',internal:false},
+    {key:'Total Talent Size',     label:'Talent Pool',      fmt:v=>v!=null?v.toLocaleString():'—',       sort:'num', internal:false},
+    {key:'Median Base pay',       label:'Median Pay',       fmt:v=>v!=null?'$'+v.toLocaleString():'—',   sort:'num', internal:false},
+    {key:'95th Percentile Pay',   label:'95th Pct Pay',     fmt:v=>v!=null?'$'+v.toLocaleString():'—',   sort:'num', internal:false},
+    {key:'Annual Growth Rate',    label:'Growth Rate',      fmt:v=>v!=null?v+'%':'—',                    sort:'num', internal:false},
+    {key:'Attrition Rate',        label:'Attrition Rate',   fmt:v=>v!=null?v+'%':'—',                    sort:'num', internal:false},
+    {key:'Women',                 label:'Women in Role',    fmt:v=>v!=null?v+'%':'—',                    sort:'num', internal:false},
+    {key:'Annual Demand',         label:'Annual Demand',    fmt:v=>v!=null?v.toLocaleString():'—',       sort:'num', internal:false},
+    {key:'Open Job Postings',     label:'Open Postings',    fmt:v=>v!=null?v.toLocaleString():'—',       sort:'num', internal:false},
+    {key:'Total_Days_to_Fill',    label:'Days to Fill',     fmt:v=>v!=null?v+'d':'—',                    sort:'num', internal:true},
+    {key:'Expected_Applicants',   label:'Exp. Applicants',  fmt:v=>v!=null?v.toLocaleString():'—',       sort:'num', internal:true},
+    {key:'One_Year_Retention_Rate',label:'1-Yr Retention',  fmt:v=>v||'—',                              sort:'str', internal:true},
+  ];
+
+  const DIFF_ORDER={'LOW':0,'MODERATE':1,'HIGH':2};
+  const LOWER_BETTER=new Set(['Attrition Rate','Total_Days_to_Fill']);
+  let sortCol=2, sortDir=1;
+
+  const locs=Object.keys(DATA[f][t]);
+  const rows=locs.map(l=>{const r=Object.assign({},DATA[f][t][l]);r._loc=l;return r;});
+
+  function numVal(row,col){
+    const v=row[col.key];
+    if(v==null)return null;
+    if(typeof v==='string'&&v.endsWith('%'))return parseFloat(v);
+    return typeof v==='number'?v:null;
+  }
+
+  const medians={};
+  COLS.forEach(col=>{
+    if(col.sort==='num'){
+      const vals=rows.map(r=>numVal(r,col)).filter(v=>v!=null).sort((a,b)=>a-b);
+      medians[col.key]=vals.length?vals[Math.floor(vals.length/2)]:null;
+    }
+  });
+
+  function cellBg(row,col){
+    if(col.sort!=='num')return '';
+    const med=medians[col.key];if(med==null)return '';
+    const v=numVal(row,col);if(v==null)return '';
+    const ratio=(v-med)/Math.max(1,Math.abs(med));
+    const inv=LOWER_BETTER.has(col.key);
+    if(ratio>0.15) return inv?'rgba(232,93,117,0.2)':'rgba(80,200,120,0.2)';
+    if(ratio<-0.15)return inv?'rgba(80,200,120,0.2)':'rgba(232,93,117,0.2)';
+    return '';
+  }
+
+  function diffColor(v){
+    if(!v)return 'var(--text-muted)';
+    if(v==='HIGH')return '#E85D75';
+    if(v==='MODERATE')return '#F5A623';
+    if(v==='LOW')return '#50C878';
+    return 'var(--text)';
+  }
+
+  function doSort(){
+    const col=COLS[sortCol];
+    rows.sort((a,b)=>{
+      if(col.sort==='str')return sortDir*(String(a._loc||'').localeCompare(String(b._loc||'')));
+      if(col.sort==='diff')return sortDir*((DIFF_ORDER[a['Hiring Difficulty']]||1)-(DIFF_ORDER[b['Hiring Difficulty']]||1));
+      const av=numVal(a,col),bv=numVal(b,col);
+      if(av==null&&bv==null)return 0;
+      if(av==null)return 1;if(bv==null)return -1;
+      return sortDir*(bv-av);
+    });
+  }
+
+  function render(){
+    doSort();
+    const thead=document.getElementById('cmp-thead');
+    thead.innerHTML='<tr>'+COLS.map((col,ci)=>{
+      const active=ci===sortCol;
+      const ic=col.internal?'#C09BCC':active?'var(--vblue)':'var(--text-muted)';
+      const fs=col.internal?'italic':'normal';
+      return `<th data-ci="${ci}" style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;
+        letter-spacing:.07em;text-transform:uppercase;color:${ic};font-style:${fs};
+        cursor:pointer;white-space:nowrap;border-bottom:2px solid var(--border);
+        user-select:none;transition:color .15s">${col.label}${active?(sortDir>0?' ↓':' ↑'):''}</th>`;
+    }).join('')+'</tr>';
+
+    const tbody=document.getElementById('cmp-tbody');
+    tbody.innerHTML=rows.map((row,ri)=>{
+      const isSel=row._loc===sl;
+      const rowBg=isSel?'background:rgba(149,203,205,0.1);':'';
+      const bleft=isSel?'border-left:3px solid #95CBCD;':'border-left:3px solid transparent;';
+      const hover=`onmouseenter="this.style.background='rgba(126,91,165,0.15)'" onmouseleave="this.style.background='${isSel?'rgba(149,203,205,0.1)':''}'"`;
+      return `<tr style="border-bottom:1px solid rgba(82,36,127,0.2);${rowBg}${bleft}transition:background .1s" ${hover}>`+
+        COLS.map((col,ci)=>{
+          const val=col.key==='_loc'?row._loc:row[col.key];
+          const bg=col.key==='Hiring Difficulty'?'':cellBg(row,col);
+          let color='var(--text)',fw='400';
+          if(col.key==='_loc'){color=isSel?'#95CBCD':'var(--text)';fw='600';}
+          if(col.key==='Hiring Difficulty'){color=diffColor(val);fw='700';}
+          const display=col.fmt(val);
+          const fs=col.internal?'font-style:italic;':'';
+          return `<td style="padding:7px 12px;color:${color};font-weight:${fw};${fs}background:${bg}">${display}</td>`;
+        }).join('')+'</tr>';
+    }).join('');
+
+    document.querySelectorAll('#cmp-thead th').forEach(th=>{
+      th.addEventListener('click',()=>{
+        const ci=parseInt(th.dataset.ci);
+        if(ci===sortCol)sortDir*=-1;else{sortCol=ci;sortDir=1;}
+        render();
+      });
+    });
+  }
+
+  render();
 }
 
 // ── D3 MAP ────────────────────────────────────────────────────
